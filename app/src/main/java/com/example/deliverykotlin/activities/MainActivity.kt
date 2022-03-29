@@ -45,13 +45,16 @@ class MainActivity : AppCompatActivity() {
                     call: Call<ResponseHttp>,
                     response: Response<ResponseHttp>
                 ) {
-                    Toast.makeText(this@MainActivity, "${response.body()?.message}", Toast.LENGTH_SHORT).show()
-                    if(response.body()?.success == true){
-                        Log.d("LOGIN","Reponse: ${response.body()}")
+                    Toast.makeText(
+                        this@MainActivity,
+                        "${response.body()?.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    if (response.body()?.success == true) {
+                        Log.d("LOGIN", "Reponse: ${response.body()}")
                         saveUserInSession(response.body()?.data.toString())
-                        goToClientHome()
-                    }else{
-                        Log.d("LOGIN","Reponse ERROR: ${response.body()}")
+                    } else {
+                        Log.d("LOGIN", "Reponse ERROR: ${response.body()}")
                     }
 
                 }
@@ -90,22 +93,38 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun saveUserInSession(data:String){
+    private fun saveUserInSession(data: String) {
         val sharePref = SharePref(this)
         val gson = Gson()
-        val user = gson.fromJson(data,User::class.java)
-        sharePref.save("user",user)
+        val user = gson.fromJson(data, User::class.java)
+        sharePref.save("user", user)
+
+        if (user.roles?.size!! > 1) {
+            goToSelectRol()
+        } else {
+            goToClientHome()
+        }
     }
-    private fun goToClientHome(){
-        val i = Intent(this,ClientHomeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+
+    private fun goToClientHome() {
+        val i =
+            Intent(this, ClientHomeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         startActivity(i)
         finish()
     }
-    private fun getUserSession(){
+
+    private fun goToSelectRol() {
+        val i =
+            Intent(this, SelectRolesActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(i)
+        finish()
+    }
+
+    private fun getUserSession() {
         val sharePref = SharePref(this)
         val gson = Gson()
-        if(!sharePref.getData("user").isNullOrBlank()){
-            val user = gson.fromJson(sharePref.getData("user"),User::class.java)
+        if (!sharePref.getData("user").isNullOrBlank()) {
+            val user = gson.fromJson(sharePref.getData("user"), User::class.java)
             goToClientHome()
         }
     }

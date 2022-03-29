@@ -6,10 +6,13 @@ import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.deliverykotlin.activities.client.home.ClientHomeActivity
 import com.example.deliverykotlin.databinding.ActivityRegisterBinding
 import com.example.deliverykotlin.models.ResponseHttp
 import com.example.deliverykotlin.models.User
 import com.example.deliverykotlin.providers.UsersProvider
+import com.example.deliverykotlin.utils.SharePref
+import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -59,6 +62,11 @@ class RegisterActivity : AppCompatActivity() {
                     response: Response<ResponseHttp>
                 ) {
 
+                    if(response.isSuccessful){
+                        saveUserInSession(response.body()?.data.toString())
+                        goToClientHome()
+                    }
+
                     Toast.makeText(this@RegisterActivity, response.message(), Toast.LENGTH_SHORT)
                         .show()
                     Log.d("REGISTRO", "${response}")
@@ -83,6 +91,11 @@ class RegisterActivity : AppCompatActivity() {
         Log.d("REGISTRO", phone)
         Log.d("REGISTRO", password)
         Log.d("REGISTRO", repeatPassword)
+    }
+    private fun goToClientHome(){
+        val i = Intent(this, ClientHomeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(i)
+        finish()
     }
 
     private fun isValidForm(
@@ -122,5 +135,12 @@ class RegisterActivity : AppCompatActivity() {
         val i = Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         startActivity(i)
         finish()
+    }
+
+    private fun saveUserInSession(data:String){
+        val sharePref = SharePref(this)
+        val gson = Gson()
+        val user = gson.fromJson(data,User::class.java)
+        sharePref.save("user",user)
     }
 }
